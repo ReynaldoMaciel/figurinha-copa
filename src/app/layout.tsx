@@ -11,6 +11,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: 'Figurinha Copa Solare',
   description: 'Vire um Atleta Solare. Monte sua figurinha oficial em apenas 3 passos.',
+  icons: { icon: '/icon.svg', shortcut: '/icon.svg' },
 }
 
 export default function RootLayout({
