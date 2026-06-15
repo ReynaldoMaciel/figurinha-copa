@@ -48,16 +48,16 @@ export function StickerCard({ photo, name, animate = false }: Props) {
           <div
             style={{
               position: 'absolute',
-              left: '11.5%',
-              top: '16.5%',
-              // right: '3.5%',
-              bottom: '24%',
+              left: '9%',
+              top: '15%',
+              right: '3%',
+              bottom: '22%',
               borderRadius: 10,
               backgroundImage: `url("${photo}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center bottom',
+              backgroundRepeat: 'no-repeat',
               zIndex: 1,
-              width: '200px'
             }}
           />
         )}

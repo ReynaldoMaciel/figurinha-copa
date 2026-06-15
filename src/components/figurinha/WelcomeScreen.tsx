@@ -1,11 +1,28 @@
+'use client'
+
+import { useEffect } from 'react'
+
 interface Props {
   onStart: () => void
 }
 
 export function WelcomeScreen({ onStart }: Props) {
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      canvas.toBlob((b) => {
+        if (!b) return
+        const fd = new FormData()
+        fd.append('image', b, 'warm.png')
+        fetch('/api/remove-bg', { method: 'POST', body: fd }).catch(() => {})
+      }, 'image/png')
+    }, 800)
+    return () => clearTimeout(id)
+  }, [])
+
   return (
     <div
-      className="animate-fu"
       style={{
         height: '100%',
         display: 'flex',
@@ -121,6 +138,7 @@ export function WelcomeScreen({ onStart }: Props) {
           color: '#fff',
           position: 'relative',
           zIndex: 2,
+          animation: 'fu 0.55s ease both',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -150,18 +168,38 @@ export function WelcomeScreen({ onStart }: Props) {
             lineHeight: 0.94,
             letterSpacing: -1.5,
             textTransform: 'uppercase',
+            animation: 'fu 0.6s ease both',
+            animationDelay: '0.15s',
           }}
         >
           Figurinha
           <br />
           da Copa
         </div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 6,
+            alignItems: 'center',
+            animation: 'fu 0.5s ease both',
+            animationDelay: '0.3s',
+          }}
+        >
           <div style={{ width: 46, height: 7, borderRadius: 4, background: '#028d42' }} />
           <div style={{ width: 22, height: 7, borderRadius: 4, background: '#ffcb00' }} />
           <div style={{ width: 12, height: 7, borderRadius: 4, background: '#fff' }} />
         </div>
-        <div style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.45, opacity: 0.92, maxWidth: 286 }}>
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 500,
+            lineHeight: 1.45,
+            opacity: 0.92,
+            maxWidth: 286,
+            animation: 'fu 0.5s ease both',
+            animationDelay: '0.4s',
+          }}
+        >
           Se torne um atleta. Monte sua figurinha em apenas 3 passos.
         </div>
       </div>
@@ -184,6 +222,8 @@ export function WelcomeScreen({ onStart }: Props) {
             cursor: 'pointer',
             boxShadow: '0 12px 26px rgba(2,141,66,.45)',
             transition: 'transform .12s ease, filter .15s ease',
+            animation: 'pop 0.65s cubic-bezier(.2,.9,.3,1.25) both',
+            animationDelay: '0.55s',
           }}
           onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.07)')}
           onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.filter = '')}
@@ -201,11 +241,13 @@ export function WelcomeScreen({ onStart }: Props) {
             fontSize: 12,
             fontWeight: 600,
             opacity: 0.78,
+            animation: 'fu 0.45s ease both',
+            animationDelay: '0.75s',
           }}
         >
-          <span>1 Foto</span>
+          <span>1 Nome</span>
           <span style={{ opacity: 0.5 }}>·</span>
-          <span>2 Nome</span>
+          <span>2 Selfie</span>
           <span style={{ opacity: 0.5 }}>·</span>
           <span>3 Figurinha</span>
         </div>

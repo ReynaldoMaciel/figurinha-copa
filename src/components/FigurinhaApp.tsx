@@ -24,7 +24,7 @@ function loadState(): AppState {
     const s = JSON.parse(raw)
     if (typeof s !== 'object' || s === null) return { screen: 'welcome', photo: null, name: '' }
     return {
-      screen: (s.screen as Screen) || 'welcome',
+      screen: 'welcome',
       photo: s.photo || null,
       name: s.name || '',
     }
@@ -46,6 +46,23 @@ function readAsDataUrl(source: File | Blob): Promise<string> {
     const r = new FileReader()
     r.onload = () => res(r.result as string)
     r.readAsDataURL(source)
+  })
+}
+
+function compressImage(file: File, maxDim = 1280): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
+      canvas.toBlob((b) => resolve(b ?? file), 'image/jpeg', 0.88)
+    }
+    img.src = url
   })
 }
 
@@ -90,16 +107,17 @@ export function FigurinhaApp() {
     if (!f) return
     e.target.value = ''
 
-    // Show original photo immediately for instant feedback
     const original = await readAsDataUrl(f)
     persist({ photo: original })
 
-    // Remove background in the background
     setProcessing(true)
     try {
-      const { removeBackground } = await import('@imgly/background-removal')
-      const blob = await removeBackground(f)
-      const processed = await readAsDataUrl(blob)
+      const compressed = await compressImage(f)
+      const fd = new FormData()
+      fd.append('image', compressed, 'photo.jpg')
+      const res = await fetch('/api/remove-bg', { method: 'POST', body: fd })
+      if (!res.ok) throw new Error('server error')
+      const processed = await readAsDataUrl(await res.blob())
       persist({ photo: processed })
     } catch {
       // Keep original photo if removal fails
@@ -158,7 +176,17 @@ export function FigurinhaApp() {
         overflow: 'hidden',
       }}
     >
-      {screen === 'welcome' && <WelcomeScreen onStart={() => persist({ screen: 'photo' })} />}
+      {screen === 'welcome' && <WelcomeScreen onStart={() => persist({ screen: 'name' })} />}
+
+      {screen === 'name' && (
+        <NameScreen
+          photo={photo}
+          name={name}
+          onNameChange={(e) => persist({ name: e.target.value.slice(0, 22) })}
+          onBack={() => persist({ screen: 'welcome' })}
+          onContinue={() => { if (name.trim()) persist({ screen: 'photo' }) }}
+        />
+      )}
 
       {screen === 'photo' && (
         <PhotoScreen
@@ -167,17 +195,7 @@ export function FigurinhaApp() {
           processing={processing}
           onFile={handleFile}
           onUseExample={(src) => persist({ photo: src })}
-          onContinue={() => { if (photo && !processing) persist({ screen: 'name' }) }}
-        />
-      )}
-
-      {screen === 'name' && (
-        <NameScreen
-          photo={photo}
-          name={name}
-          onNameChange={(e) => persist({ name: e.target.value.slice(0, 22) })}
-          onBack={() => persist({ screen: 'photo' })}
-          onContinue={() => { if (name.trim()) persist({ screen: 'result' }) }}
+          onContinue={() => { if (photo && !processing) persist({ screen: 'result' }) }}
         />
       )}
 

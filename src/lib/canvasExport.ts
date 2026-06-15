@@ -14,11 +14,11 @@ const S = 3
 const BW = 330
 const BH = Math.round((BW * 2068) / 1559) // ≈ 438
 
-// Photo area — matches StickerCard: left 11.5%, top 16.5%, width 200/294≈68%, bottom 24%
-const PHOTO_X = BW * 0.115
-const PHOTO_Y = BH * 0.165
-const PHOTO_W = BW * (200 / 294) // ≈ 224px
-const PHOTO_H = BH * 0.76 - PHOTO_Y
+// Photo area — matches StickerCard: left 9%, top 15%, right 3%, bottom 22%
+const PHOTO_X = BW * 0.09
+const PHOTO_Y = BH * 0.15
+const PHOTO_W = BW * (1 - 0.09 - 0.03)
+const PHOTO_H = BH * (1 - 0.22) - PHOTO_Y
 const PHOTO_R = 10
 
 // Name band — matches StickerCard: left 5%, right 19%, bottom 9%, height 9.2%
@@ -27,7 +27,7 @@ const NAME_W = BW * 0.76 // 1 - 0.05 - 0.19
 const NAME_H = BH * 0.092
 const NAME_Y = BH * (1 - 0.09 - 0.092)
 
-function drawCoverFit(
+function drawContainFit(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   x: number,
@@ -45,9 +45,13 @@ function drawCoverFit(
   const tr = w / h
   let dw, dh, dx, dy
   if (ir > tr) {
-    dh = h; dw = h * ir; dx = x - (dw - w) / 2; dy = y
+    // wider than area — constrain by width, bottom-align
+    dw = w; dh = w / ir
+    dx = x; dy = y + h - dh
   } else {
-    dw = w; dh = w / ir; dx = x; dy = y - (dh - h) / 2
+    // taller than area — constrain by height, center horizontally
+    dh = h; dw = h * ir
+    dx = x + (w - dw) / 2; dy = y
   }
   ctx.drawImage(img, dx, dy, dw, dh)
   ctx.restore()
@@ -74,7 +78,7 @@ function buildCanvas(
 
   // 2. User photo on top, clipped to portrait area
   if (userPhoto) {
-    drawCoverFit(ctx, userPhoto, PHOTO_X, PHOTO_Y, PHOTO_W, PHOTO_H, PHOTO_R)
+    drawContainFit(ctx, userPhoto, PHOTO_X, PHOTO_Y, PHOTO_W, PHOTO_H, PHOTO_R)
   }
 
   // 3. Name text over the moldura's name band

@@ -16,6 +16,7 @@ export function PhotoScreen({ photo, examples, processing, onFile, onUseExample,
   const hasPhoto = !!photo
   const canContinue = hasPhoto && !processing
 
+
   return (
     <div
       className="animate-fu-fast"

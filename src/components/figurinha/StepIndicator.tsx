@@ -1,15 +1,15 @@
 type Screen = 'welcome' | 'photo' | 'name' | 'result'
 
 const STEPS = [
-  { n: 1, label: 'Foto' },
-  { n: 2, label: 'Nome' },
+  { n: 1, label: 'Nome' },
+  { n: 2, label: 'Selfie' },
   { n: 3, label: 'Figurinha' },
 ]
 
 const SCREEN_INDEX: Record<Screen, number> = {
   welcome: 0,
-  photo: 1,
-  name: 2,
+  name: 1,
+  photo: 2,
   result: 3,
 }
 
