@@ -49,30 +49,13 @@ function readAsDataUrl(source: File | Blob): Promise<string> {
   })
 }
 
-function compressImage(file: File, maxDim = 1280): Promise<Blob> {
-  return new Promise((resolve) => {
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
-      const canvas = document.createElement('canvas')
-      canvas.width = Math.round(img.width * scale)
-      canvas.height = Math.round(img.height * scale)
-      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height)
-      canvas.toBlob((b) => resolve(b ?? file), 'image/jpeg', 0.88)
-    }
-    img.src = url
-  })
-}
-
 export function FigurinhaApp() {
   const [screen, setScreen] = useState<Screen>('welcome')
   const [photo, setPhoto] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [toast, setToast] = useState('')
   const [examples, setExamples] = useState<string[]>([])
-  const [processing, setProcessing] = useState(false)
+  const processing = false
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -106,24 +89,8 @@ export function FigurinhaApp() {
     const f = e.target.files?.[0]
     if (!f) return
     e.target.value = ''
-
     const original = await readAsDataUrl(f)
     persist({ photo: original })
-
-    setProcessing(true)
-    try {
-      const compressed = await compressImage(f)
-      const fd = new FormData()
-      fd.append('image', compressed, 'photo.jpg')
-      const res = await fetch('/api/remove-bg', { method: 'POST', body: fd })
-      if (!res.ok) throw new Error('server error')
-      const processed = await readAsDataUrl(await res.blob())
-      persist({ photo: processed })
-    } catch {
-      // Keep original photo if removal fails
-    } finally {
-      setProcessing(false)
-    }
   }
 
   async function handleDownload() {
