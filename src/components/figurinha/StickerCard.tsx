@@ -49,17 +49,27 @@ export function StickerCard({ photo, name, animate = false }: Props) {
             style={{
               position: 'absolute',
               left: '9%',
-              top: '15%',
-              right: '3%',
-              bottom: '22%',
-              borderRadius: 10,
-              backgroundImage: `url("${photo}")`,
-              backgroundSize: 'contain',
-              backgroundPosition: 'center bottom',
-              backgroundRepeat: 'no-repeat',
+              top: '18%',
+              right: '9%',
+              bottom: '25%',
               zIndex: 1,
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
             }}
-          />
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo}
+              alt=""
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                display: 'block',
+                borderRadius: 16,
+              }}
+            />
+          </div>
         )}
 
         {/* Shine sweep over the photo (runs once after pop) */}

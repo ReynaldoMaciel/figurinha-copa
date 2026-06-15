@@ -16,7 +16,7 @@ const BH = Math.round((BW * 2068) / 1559) // ≈ 438
 
 // Photo area — matches StickerCard: left 9%, top 15%, right 3%, bottom 22%
 const PHOTO_X = BW * 0.09
-const PHOTO_Y = BH * 0.15
+const PHOTO_Y = BH * 0.20
 const PHOTO_W = BW * (1 - 0.09 - 0.03)
 const PHOTO_H = BH * (1 - 0.22) - PHOTO_Y
 const PHOTO_R = 10
@@ -36,23 +36,21 @@ function drawContainFit(
   h: number,
   r: number
 ) {
-  ctx.save()
-  ctx.beginPath()
-  ctx.roundRect(x, y, w, h, r)
-  ctx.clip()
-
   const ir = img.width / img.height
   const tr = w / h
   let dw, dh, dx, dy
   if (ir > tr) {
-    // wider than area — constrain by width, bottom-align
     dw = w; dh = w / ir
     dx = x; dy = y + h - dh
   } else {
-    // taller than area — constrain by height, center horizontally
     dh = h; dw = h * ir
     dx = x + (w - dw) / 2; dy = y
   }
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.roundRect(dx, dy, dw, dh, r)
+  ctx.clip()
   ctx.drawImage(img, dx, dy, dw, dh)
   ctx.restore()
 }
