@@ -211,6 +211,12 @@
   }
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-fu {
   animation: fu 0.55s ease both;
 }

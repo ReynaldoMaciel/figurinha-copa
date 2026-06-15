@@ -6,13 +6,15 @@ import { StepIndicator } from './StepIndicator'
 interface Props {
   photo: string | null
   examples: string[]
+  processing: boolean
   onFile: (e: React.ChangeEvent<HTMLInputElement>) => void
   onUseExample: (src: string) => void
   onContinue: () => void
 }
 
-export function PhotoScreen({ photo, examples, onFile, onUseExample, onContinue }: Props) {
+export function PhotoScreen({ photo, examples, processing, onFile, onUseExample, onContinue }: Props) {
   const hasPhoto = !!photo
+  const canContinue = hasPhoto && !processing
 
   return (
     <div
@@ -62,34 +64,63 @@ export function PhotoScreen({ photo, examples, onFile, onUseExample, onContinue 
                 backgroundPosition: 'center',
               }}
             />
-            <div
-              style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                background: '#028d42',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(0,0,0,.35)',
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#fff"
-                strokeWidth="3.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {processing ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(0,0,0,.55)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                }}
               >
-                <path d="M5 13l4 4 10-10" />
-              </svg>
-            </div>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    border: '3px solid rgba(255,255,255,.25)',
+                    borderTopColor: '#fff',
+                    animation: 'spin 0.75s linear infinite',
+                  }}
+                />
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', letterSpacing: 0.3 }}>
+                  Removendo fundo…
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 10,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: '#028d42',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 10px rgba(0,0,0,.35)',
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 13l4 4 10-10" />
+                </svg>
+              </div>
+            )}
           </>
         ) : (
           <div style={{ 
@@ -198,7 +229,7 @@ export function PhotoScreen({ photo, examples, onFile, onUseExample, onContinue 
       <div style={{ marginTop: 'auto', paddingTop: 20 }}>
         <button
           onClick={onContinue}
-          disabled={!hasPhoto}
+          disabled={!canContinue}
           style={{
             width: '100%',
             padding: 16,
@@ -209,13 +240,13 @@ export function PhotoScreen({ photo, examples, onFile, onUseExample, onContinue 
             fontSize: 16,
             letterSpacing: 0.3,
             transition: 'transform .12s ease',
-            cursor: hasPhoto ? 'pointer' : 'default',
-            background: hasPhoto ? '#028d42' : 'rgba(255,255,255,.14)',
-            color: hasPhoto ? '#fff' : 'rgba(255,255,255,.4)',
-            boxShadow: hasPhoto ? '0 10px 22px rgba(2,141,66,.4)' : 'none',
+            cursor: canContinue ? 'pointer' : 'default',
+            background: canContinue ? '#028d42' : 'rgba(255,255,255,.14)',
+            color: canContinue ? '#fff' : 'rgba(255,255,255,.4)',
+            boxShadow: canContinue ? '0 10px 22px rgba(2,141,66,.4)' : 'none',
           }}
           onMouseDown={(e) => {
-            if (hasPhoto) (e.currentTarget as HTMLButtonElement).style.transform = 'scale(.97)'
+            if (canContinue) (e.currentTarget as HTMLButtonElement).style.transform = 'scale(.97)'
           }}
           onMouseUp={(e) => ((e.currentTarget as HTMLButtonElement).style.transform = '')}
         >

@@ -41,12 +41,21 @@ function saveState(s: AppState) {
   }
 }
 
+function readAsDataUrl(source: File | Blob): Promise<string> {
+  return new Promise((res) => {
+    const r = new FileReader()
+    r.onload = () => res(r.result as string)
+    r.readAsDataURL(source)
+  })
+}
+
 export function FigurinhaApp() {
   const [screen, setScreen] = useState<Screen>('welcome')
   const [photo, setPhoto] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [toast, setToast] = useState('')
   const [examples, setExamples] = useState<string[]>([])
+  const [processing, setProcessing] = useState(false)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -76,13 +85,27 @@ export function FigurinhaApp() {
     toastTimer.current = setTimeout(() => setToast(''), 2300)
   }
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-    const r = new FileReader()
-    r.onload = () => persist({ photo: r.result as string })
-    r.readAsDataURL(f)
     e.target.value = ''
+
+    // Show original photo immediately for instant feedback
+    const original = await readAsDataUrl(f)
+    persist({ photo: original })
+
+    // Remove background in the background
+    setProcessing(true)
+    try {
+      const { removeBackground } = await import('@imgly/background-removal')
+      const blob = await removeBackground(f)
+      const processed = await readAsDataUrl(blob)
+      persist({ photo: processed })
+    } catch {
+      // Keep original photo if removal fails
+    } finally {
+      setProcessing(false)
+    }
   }
 
   async function handleDownload() {
@@ -141,9 +164,10 @@ export function FigurinhaApp() {
         <PhotoScreen
           photo={photo}
           examples={examples}
+          processing={processing}
           onFile={handleFile}
           onUseExample={(src) => persist({ photo: src })}
-          onContinue={() => { if (photo) persist({ screen: 'name' }) }}
+          onContinue={() => { if (photo && !processing) persist({ screen: 'name' }) }}
         />
       )}
 
